@@ -62,9 +62,13 @@ $.localize = (pkg, options = {}) ->
   defaultCallback = (data) ->
     $.localize.data[pkg] = data
     wrappedSet.each ->
-      elem = $(this)
-      key = elem.attr("rel").match(/localize\[(.*?)\]/)[1]
+      target = $(this)
+      key = target.attr("rel").match(/localize\[(.*?)\]/)[1]
       value = valueForKey(key, data)
+      elem = target
+      if options.childSelector
+        child = target.find options.childSelector
+        elem = child if child.length > 0
       if elem.is('input')
         if elem.is("[placeholder]")
           elem.attr("placeholder", value)

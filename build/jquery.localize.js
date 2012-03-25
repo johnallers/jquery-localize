@@ -1,6 +1,8 @@
 (function() {
   var $, normaliseLang;
+
   $ = jQuery;
+
   normaliseLang = function(lang) {
     lang = lang.replace(/_/, '-').toLowerCase();
     if (lang.length > 3) {
@@ -8,20 +10,18 @@
     }
     return lang;
   };
+
   $.defaultLanguage = normaliseLang(navigator.language || navigator.userLanguage);
+
   $.localize = function(pkg, options) {
     var defaultCallback, fileExtension, intermediateLangData, jsonCall, lang, loadLanguage, notifyDelegateLanguageLoaded, regexify, valueForKey, wrappedSet;
-    if (options == null) {
-      options = {};
-    }
+    if (options == null) options = {};
     wrappedSet = this;
     intermediateLangData = {};
     fileExtension = options.fileExtension || "json";
     loadLanguage = function(pkg, lang, level) {
       var file;
-      if (level == null) {
-        level = 1;
-      }
+      if (level == null) level = 1;
       switch (level) {
         case 1:
           intermediateLangData = {};
@@ -47,9 +47,7 @@
     };
     jsonCall = function(file, pkg, lang, level) {
       var ajaxOptions, successFunc;
-      if (options.pathPrefix != null) {
-        file = "" + options.pathPrefix + "/" + file;
-      }
+      if (options.pathPrefix != null) file = "" + options.pathPrefix + "/" + file;
       successFunc = function(d) {
         $.extend(intermediateLangData, d);
         notifyDelegateLanguageLoaded(intermediateLangData);
@@ -72,10 +70,15 @@
     defaultCallback = function(data) {
       $.localize.data[pkg] = data;
       return wrappedSet.each(function() {
-        var elem, key, value;
-        elem = $(this);
-        key = elem.attr("rel").match(/localize\[(.*?)\]/)[1];
+        var child, elem, key, target, value;
+        target = $(this);
+        key = target.attr("rel").match(/localize\[(.*?)\]/)[1];
         value = valueForKey(key, data);
+        elem = target;
+        if (options.childSelector) {
+          child = target.find(options.childSelector);
+          if (child.length > 0) elem = child;
+        }
         if (elem.is('input')) {
           if (elem.is("[placeholder]")) {
             return elem.attr("placeholder", value);
@@ -86,13 +89,9 @@
           return elem.attr("label", value);
         } else if (elem.is('img')) {
           value = valueForKey("" + key + ".alt", data);
-          if (value != null) {
-            elem.attr("alt", value);
-          }
+          if (value != null) elem.attr("alt", value);
           value = valueForKey("" + key + ".src", data);
-          if (value != null) {
-            return elem.attr("src", value);
-          }
+          if (value != null) return elem.attr("src", value);
         } else {
           return elem.html(value);
         }
@@ -139,6 +138,9 @@
     }
     return wrappedSet;
   };
+
   $.fn.localize = $.localize;
+
   $.localize.data = {};
+
 }).call(this);
